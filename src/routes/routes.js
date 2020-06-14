@@ -25,15 +25,18 @@ router.route('/accounts')
         .then(acc => res.send(acc))
     })
 
-router.route('/accounts/:id')
+router.route('/account')
     .get((req,res) => {
-        const id = parseInt(req.params.id)
-        db.getAccount(id)
+        const {agency,number} = req.body
+        const account = {agency, number}
+        db.getAccount(account)
             .then(account => res.send(account))
     })
     .delete((req,res) => {
-        const id = parseInt(req.params.id)
-        db.deleteAccounts(id)
+        const {agency,number} = req.body
+        const account = {agency, number}
+        db.deleteAccounts()
+            .then(msg => res.send(msg))
     })
 
 
@@ -58,6 +61,7 @@ router.put('/deposit', (req, res) => {
         number: req.body.number
     }
     db.deposit(operation)
+        .then(balance => res.send(balance))
 })
 
 router.put('/transfer', (req, res) => {
@@ -65,10 +69,28 @@ router.put('/transfer', (req, res) => {
         typeOperation: req.body.typeOperation,
         value: parseFloat(req.body.value),
         date: new Date(),
-        agency: req.body.number,
-        number: req.body.number
+        agency: req.body.agency,
+        number: req.body.number,
+        agencyOrigin: req.body.agencyOrigin,
+        numberOrigin: req.body.numberOrigin
     }
+
+    db.transfer(operation)
+        .then(result => res.send(result))
 })
 
+router.get('/balance', (req, res) => {
+    const {agency,number} = req.body
+    const account = {agency, number}
+    db.getBalance(account)
+        .then(result => res.send(result))
+})
+
+router.get('/extract', (req,res) => {
+    const {agency,number} = req.body
+    const account = {agency, number}
+   db.viewExtracts(account)
+    .then(result => res.send(result))
+})
 
 module.exports = router
